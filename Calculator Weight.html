@@ -1,0 +1,233 @@
+# This is a simple calculator of weight for a local client website.
+# Includes the posibility of change shapes and materials, and set custom sizes and cuantities.
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</script>
+</head>
+
+<form>
+  <raw>
+    <div class="left col">
+      <div class="content">
+        <label for="producto">Producto</label></Br>
+        <select class="inputProducto" name="select" id=selectProductos>
+          <option data-tipo="tubo" selected>Tubo Redondo</option>
+          <option data-tipo="cuadrada">Barra Cuadrada</option>
+          <option data-tipo="redonda">Barra Redonda</option>
+          <option  data-tipo="hexa">Barra Hexagonal</option>
+        </select></Br>
+        <label for="Material">Material</label></Br>
+        <select class="inputProducto" name="select2" id=selectMaterial>
+          <option data-densidad="8000">Acero Inoxidable</option>
+          <option data-densidad="8400" selected>Latón</option>
+          <option data-densidad="2730">Aluminio</option>
+        </select></Br>
+        <label for="unidades">Cantidad de Unidades</label></Br>
+        <input class="inputProducto" id="unidades"></Br>
+      </div>
+    </div>
+    <div class="right col">
+      <div class="content">
+        <div class="range">
+          <label for="longitud">Longitud</label></br>
+          <input class="inputProducto" type="range" name="longitud" id="longitud" min="30" max="6500" step="10" value="4">
+          <output class="long-out" for="longitud"></output>
+        </div>
+        <div class="range">
+          <label for="diametro">Diámetro</label></br>
+          <input class="inputProducto" type="range" name="diametro" id="diametro" min="2" max="150" step="1" value="4">
+          <output class="diam-out" for="diametro"></output>
+        </div>
+        <div class="range">
+          <label for="pared">Espesor de la pared</label></br>
+          <input class="inputProducto" type="range" name="pared" id="pared" min="0.2" max="30" step="0.1" value="0.5">
+          <output class="pared-out" for="pared"></output>
+        </div>
+      </div>
+    </div>
+    <div id="pesoCalcBox">
+      <label for="unidades" id="pesoCalcLabel">Peso calculado:</label></Br>
+      <div id="pesoCalc"></div>
+    </div>
+  </raw>
+</form>
+
+<script>
+
+  //Configuración de output instantaneo para Input type="range"
+const pesoCalc = document.querySelector('#pesoCalc')
+const longitud = document.querySelector('#longitud')
+const longout = document.querySelector('.long-out')
+const diametro = document.querySelector('#diametro')
+const diamout = document.querySelector('.diam-out')
+var pared = document.querySelector('#pared')
+const paredout = document.querySelector('.pared-out')
+
+longout.textContent = longitud.value + ' mm'
+diamout.textContent = diametro.value + ' mm'
+paredout.textContent = pared.value + ' mm'
+
+longitud.addEventListener('input', function() {
+  longout.textContent = longitud.value + ' mm'
+});
+diametro.addEventListener('input', function() {
+  diamout.textContent = diametro.value + ' mm'
+});
+pared.addEventListener('input', function() {
+  paredout.textContent = pared.value + ' mm'
+});
+
+// Interacciones del formulario con el usuario
+var elements = document.getElementsByClassName("inputProducto");
+for (var i = 0; i < elements.length; i++) {
+    elements[i].addEventListener("input", producto)
+};
+
+producto();
+
+function producto(){
+  calcPeso();
+  desactivarPared();
+};
+
+//Calculadora de pesos
+function calcPeso(){
+  const radio = diametro.value / 2000;
+  const unidades = document.querySelector('#unidades').value;
+  const radioInt = radio - (pared.value/1000);
+  const perimetroHexa = 2 * radio * Math.tan(0.523599) * 6;
+  const densidad = $('#selectMaterial option:selected').data('densidad');
+  const tipo = $('#selectProductos option:selected').data('tipo');
+  if (tipo =='redonda'){
+    var resultado = longitud.value/1000 * Math.PI * radio * radio * unidades * densidad;  
+  }
+  if (tipo =='cuadrada'){
+    var resultado = longitud.value/1000 * diametro.value/1000 * diametro.value/1000 * unidades * densidad;  
+  }  
+  if (tipo =='hexa'){
+    var resultado = perimetroHexa * radio / 2 * unidades * densidad * longitud.value/1000;  
+  }
+  if (tipo =='tubo'){
+    var resultado = (longitud.value/1000 * Math.PI * ((radio * radio) - (radioInt * radioInt)) * unidades * densidad);
+  }
+  document.querySelector('#pesoCalc').innerHTML = resultado.toFixed(2) + ' kg';
+};
+
+function desactivarPared(){
+  const tipo = $('#selectProductos option:selected').data('tipo');
+  document.getElementById("pared").disabled = (tipo =='redonda') || (tipo =='cuadrada') || (tipo =='hexa');
+};
+
+
+</script> 
+
+<style>
+@media (min-width: 768px) {
+  .left{
+    float:left;
+  }
+  .right{
+    float: right;
+  }
+output{
+    font-family: montserrat;
+    font-size: 17px;
+}
+.col{
+  width:50%;
+}
+.content{
+  padding: 0px 20px 0px 20px!important;
+}
+.col select, #unidades,  #pesoCalc{
+  width: 80%;
+  border-style: none;
+  border-radius: 25px;
+}
+#pesoCalc, #unidades, select{
+    font-family: montserrat;
+    font-size:16px;
+    padding:5px;
+    padding-left:20px;
+    height: 40px;
+    margin-bottom: 10px;
+}
+.range input{
+  width: 70%;
+  -webkit-appearance: none;
+  background: white;
+}
+.range{
+    height:85px}
+input[type=range]::-webkit-slider-thumb{
+    width: 20px;
+    height: 20px;
+    background-color:#FF790E!Important;
+    border-color: white;
+}
+#pesoCalcLabel{
+    padding-top:4px;
+}
+}
+
+@media (max-width: 768px) {
+output{
+    font-family: montserrat;
+    font-size: 17px;
+}
+.content{
+  padding: 0px 20px 0px 20px!important;
+}
+.col select, #unidades,  #pesoCalc{
+  width: 100%;
+  border-style: none;
+  border-radius: 25px;
+}
+#unidades, select{
+    background-color:white;
+    font-family: montserrat;
+    font-size:16px;
+    padding:5px;
+    padding-left:20px;
+    height: 40px;
+    margin-bottom: 10px;
+}
+.range input{
+  width: 73%;
+  -webkit-appearance: none;
+  background: white;
+}
+.range{
+    height:85px}
+input[type=range]::-webkit-slider-thumb{
+    width: 20px;
+    height: 20px;
+    background-color:#FF790E!Important;
+    border-color: white;
+    
+}
+}
+#pesoCalcBox{
+   display:flex;
+   flex-direction: raw;
+   position:absolute;
+   bottom:-65px;
+   left:25px;
+   justify-content: center;
+   width: auto;
+   border: solid 1px;
+   border-radius: 25px;
+   padding-right:20px;
+   padding-left: 10px;
+   padding-top:10px;
+   margin-right: auto;
+   margin-left: auto;
+}
+#pesoCalcLabel, #pesoCalc{
+    width:auto;
+    font-family: montserrat;
+    font-size:16px;
+}
+
+</style>
